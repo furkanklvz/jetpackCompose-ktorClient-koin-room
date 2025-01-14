@@ -1,6 +1,5 @@
 package com.klavs.football.uix
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -10,13 +9,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.NavigateNext
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material.icons.rounded.Remove
+import androidx.compose.material.icons.rounded.SportsSoccer
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -37,14 +37,16 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
@@ -52,25 +54,38 @@ import coil3.request.crossfade
 import com.klavs.football.R
 import com.klavs.football.data.entity.BottomBarItem
 import com.klavs.football.data.entity.ListedTeamInfos
+import com.klavs.football.uix.viewModel.MyTeamsViewModel
 import kotlinx.coroutines.launch
 
 
 @Composable
-fun MyTeams(navController: NavHostController) {
-    MyTeamsContent(
-        onTeamClick = { navController.navigate("team_detail/$it") }
-    )
+fun MyTeams(navController: NavHostController, viewModel: MyTeamsViewModel) {
+
+    val myProfile by viewModel.currentProfile.collectAsStateWithLifecycle()
+
+    if (myProfile != null) {
+        MyTeamsContent(
+            onTeamClick = { navController.navigate("team_detail/$it") },
+            teams = myProfile!!.teams.map { it.toInt() },
+            addTeam = { viewModel.addTeam(it) },
+            removeTeam = { viewModel.removeTeam(it) }
+        )
+    }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun MyTeamsContent(onTeamClick: (Int) -> Unit) {
+private fun MyTeamsContent(
+    onTeamClick: (Int) -> Unit,
+    teams: List<Int>?,
+    addTeam: (Int) -> Unit,
+    removeTeam: (Int) -> Unit
+) {
     val scope = rememberCoroutineScope()
     var showAddingTeamBottomSheet by remember { mutableStateOf(false) }
     val addingTeamBottomSheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true
     )
-    val myTeams = remember { mutableStateListOf<ListedTeamInfos>() }
     val context = LocalContext.current
     Scaffold(
         floatingActionButton = {
@@ -108,28 +123,38 @@ private fun MyTeamsContent(onTeamClick: (Int) -> Unit) {
                             }
                         }
                     },
-                    myTeams = myTeams,
-                    onTeamAdded = { myTeams.add(it) },
-                    onTeamRemoved = { myTeams.remove(it) }
+                    teamIds = teams!!,
+                    onTeamAdded = { addTeam(it) },
+                    onTeamRemoved = { removeTeam(it) }
                 )
             }
             Column(
                 Modifier.matchParentSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                myTeams.forEach { team ->
+                teams!!.forEach { teamId ->
+                    val listedTeamInfo = ListedTeamInfos.teams.find { it.id == teamId }!!
                     ListItem(
-                        modifier = Modifier.clickable { onTeamClick(team.id) },
-                        headlineContent = { Text(team.name) },
+                        colors = ListItemDefaults.colors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            headlineColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                            trailingIconColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        ),
+                        modifier = Modifier
+                            .padding(5.dp)
+                            .clickable { onTeamClick(teamId) }
+                            .clip(CircleShape),
+                        headlineContent = { Text(listedTeamInfo.name) },
                         leadingContent = {
                             AsyncImage(
                                 model = ImageRequest.Builder(context)
-                                    .data(team.logoUrl)
+                                    .data(listedTeamInfo.logoUrl)
                                     .crossfade(true)
                                     .build(),
-                                error = painterResource(R.drawable.rounded_image_24),
-                                contentDescription = team.name,
-                                contentScale = ContentScale.Crop
+                                error = rememberVectorPainter(image = Icons.Rounded.SportsSoccer),
+                                contentDescription = listedTeamInfo.name,
+                                contentScale = ContentScale.Fit,
+                                modifier = Modifier.size(IconButtonDefaults.mediumContainerSize())
                             )
                         },
                         trailingContent = {
@@ -150,11 +175,14 @@ private fun MyTeamsContent(onTeamClick: (Int) -> Unit) {
 @Composable
 private fun AddingTeamBottomSheet(
     sheetState: SheetState,
-    myTeams: List<ListedTeamInfos>,
-    onTeamAdded: (ListedTeamInfos) -> Unit,
-    onTeamRemoved: (ListedTeamInfos) -> Unit,
+    teamIds: List<Int>,
+    onTeamAdded: (Int) -> Unit,
+    onTeamRemoved: (Int) -> Unit,
     onDismiss: () -> Unit
 ) {
+    val teams = teamIds.map {
+        ListedTeamInfos.teams.find { team -> team.id == it }!!
+    }
     ModalBottomSheet(
         sheetState = sheetState,
         dragHandle = { BottomSheetDefaults.DragHandle(color = Color.Transparent) },
@@ -167,7 +195,7 @@ private fun AddingTeamBottomSheet(
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Box(Modifier.fillMaxWidth()){
+            Box(Modifier.fillMaxWidth()) {
                 IconButton(
                     modifier = Modifier
                         .align(Alignment.CenterStart)
@@ -182,7 +210,9 @@ private fun AddingTeamBottomSheet(
                 Text(
                     stringResource(R.string.add_team),
                     style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(10.dp).align(Alignment.Center)
+                    modifier = Modifier
+                        .padding(10.dp)
+                        .align(Alignment.Center)
                 )
             }
 
@@ -192,7 +222,7 @@ private fun AddingTeamBottomSheet(
                     .weight(1f)
             ) {
                 ListedTeamInfos.teams.forEach { team ->
-                    val itContains = myTeams.contains(team)
+                    val itContains = teams.contains(team)
                     ListItem(
                         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                         headlineContent = {
@@ -214,9 +244,9 @@ private fun AddingTeamBottomSheet(
                                 checked = itContains,
                                 onCheckedChange = {
                                     if (it) {
-                                        onTeamAdded(team)
+                                        onTeamAdded(team.id)
                                     } else {
-                                        onTeamRemoved(team)
+                                        onTeamRemoved(team.id)
                                     }
                                 }
                             ) {
@@ -252,6 +282,13 @@ private fun AddingTeamBottomSheet(
 @Composable
 private fun MyTeamPreview() {
     MyTeamsContent(
-        onTeamClick = {}
+        onTeamClick = {},
+        teams = listOf(
+            ListedTeamInfos.teams[0].id,
+            ListedTeamInfos.teams[1].id,
+            ListedTeamInfos.teams[2].id
+        ),
+        addTeam = {},
+        removeTeam = {}
     )
 }

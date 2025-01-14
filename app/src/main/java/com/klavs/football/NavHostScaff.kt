@@ -27,6 +27,8 @@ import com.klavs.football.uix.Menu
 import com.klavs.football.uix.MyTeams
 import com.klavs.football.uix.TeamDetail
 import com.klavs.football.uix.viewModel.GreetingViewModel
+import com.klavs.football.uix.viewModel.MenuViewModel
+import com.klavs.football.uix.viewModel.MyTeamsViewModel
 import com.klavs.football.uix.viewModel.TeamDetailViewModel
 
 @Composable
@@ -62,9 +64,18 @@ private fun NavHostContent(navController: NavHostController) {
                 LaunchedEffect(Unit) {
                     bottomBarIsVisible = true
                 }
-                MyTeams(navController)
+                val viewModel = hiltViewModel<MyTeamsViewModel>(it)
+                MyTeams(
+                    navController = navController,
+                    viewModel = viewModel
+                )
             }
-            composable(BottomBarItem.Menu.route) { Menu(navController) }
+            composable(BottomBarItem.Menu.route) {
+                val viewModel = hiltViewModel<MenuViewModel>(it)
+                Menu(
+                navController,
+                viewModel
+            ) }
             composable("team_detail/{id}",
                 arguments = listOf(
                     navArgument("id") {

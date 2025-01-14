@@ -1,6 +1,5 @@
 package com.klavs.football.uix
 
-import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,9 +33,10 @@ import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.klavs.football.R
 import com.klavs.football.Resource
+import com.klavs.football.data.entity.Response
 import com.klavs.football.data.entity.Team
+import com.klavs.football.data.entity.Venue
 import com.klavs.football.uix.viewModel.TeamDetailViewModel
-import com.skydoves.landscapist.glide.GlideImage
 
 @Composable
 fun TeamDetail(
@@ -58,7 +58,7 @@ fun TeamDetail(
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun TeamDetailContent(
-    teamResource: Resource<Team>,
+    teamResource: Resource<Response>,
     navBack: () -> Unit
 ) {
     val context = LocalContext.current
@@ -100,7 +100,8 @@ private fun TeamDetailContent(
                 }
 
                 is Resource.Success -> {
-                    val team = teamResource.data!!
+                    val team = teamResource.data!!.team
+                    val venue = teamResource.data.venue
                     Column(
                         modifier = Modifier
                             .padding(15.dp)
@@ -112,7 +113,6 @@ private fun TeamDetailContent(
                         Text("country: ${team.country}")
                         Text("founded: ${team.founded}")
                         Text("national: ${team.national}")
-                        Text("coil")
                         AsyncImage(
                             model = ImageRequest.Builder(context)
                                 .data(team.logo)
@@ -120,7 +120,25 @@ private fun TeamDetailContent(
                                 .build(),
                             contentDescription = null,
                             error = painterResource(R.drawable.rounded_image_24),
-                            contentScale = ContentScale.Crop,
+                            contentScale = ContentScale.Fit,
+                            placeholder = painterResource(R.drawable.rounded_image_24),
+                            modifier = Modifier.size(IconButtonDefaults.largeContainerSize())
+                        )
+                        Text("Venue")
+                        Text("id: ${venue.id}")
+                        Text("name: ${venue.name}")
+                        Text("address: ${venue.address}")
+                        Text("city: ${venue.city}")
+                        Text("capacity: ${venue.capacity}")
+                        Text("surface: ${venue.surface}")
+                        AsyncImage(
+                            model = ImageRequest.Builder(context)
+                                .data(venue.image)
+                                .crossfade(true)
+                                .build(),
+                            contentDescription = null,
+                            error = painterResource(R.drawable.rounded_image_24),
+                            contentScale = ContentScale.Fit,
                             placeholder = painterResource(R.drawable.rounded_image_24),
                             modifier = Modifier.size(IconButtonDefaults.largeContainerSize())
                         )
@@ -135,17 +153,28 @@ private fun TeamDetailContent(
 @Preview
 @Composable
 private fun TeamDetailPreview() {
-    val team = Team(
-        id = 0,
-        code = "fb",
-        country = "Turkey",
-        founded = 1907,
-        national = true,
-        logo = "",
-        name = "Fenerbahçe"
+    val response = Response(
+        team = Team(
+            code = "",
+            country = "",
+            founded = 1905,
+            id = 0,
+            logo = "",
+            name = "",
+            national = true
+        ),
+        venue = Venue(
+            address = "",
+            capacity = 45000,
+            city = "",
+            id = 1,
+            image = "",
+            name = "",
+            surface = ""
+        )
     )
     TeamDetailContent(
-        teamResource = Resource.Success(data = team),
+        teamResource = Resource.Success(data = response),
         navBack = {}
     )
 }

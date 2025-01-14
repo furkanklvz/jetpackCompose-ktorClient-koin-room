@@ -7,7 +7,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -17,10 +16,10 @@ class ProfileManager @Inject constructor(private val profileRepo: ProfileReposit
     private val _currentProfile = MutableStateFlow<Profile?>(null)
     val currentProfile = _currentProfile.asStateFlow()
 
+    private val scope = CoroutineScope(Dispatchers.Main)
     private var currentProfileJob: Job? = null
 
     fun signIn(name: String) {
-        val scope = CoroutineScope(Dispatchers.Main)
         currentProfileJob?.cancel()
         currentProfileJob = scope.launch {
             profileRepo.getProfile(name).collect{profile->
@@ -30,8 +29,8 @@ class ProfileManager @Inject constructor(private val profileRepo: ProfileReposit
     }
 
     fun signOut() {
-        currentProfileJob?.cancel()
         _currentProfile.value = null
+        currentProfileJob?.cancel()
     }
 
 }

@@ -1,6 +1,5 @@
 package com.klavs.football.uix.viewModel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.klavs.football.data.entity.Profile
@@ -42,7 +41,6 @@ class GreetingViewModel @Inject constructor(
 
     fun insertProfile(name: String) {
         viewModelScope.launch(Dispatchers.Main) {
-            Log.d("GreetingViewModel", "insertProfile called with: $name")
             profileRepo.insertProfile(
                 profile = Profile(
                     name = name,

@@ -7,6 +7,7 @@ interface ProfileRepository {
     suspend fun getProfiles(): Flow<List<String>>
     suspend fun getProfile(name: String): Flow<Profile>
     suspend fun insertProfile(profile: Profile)
-    suspend fun deleteProfile(profile: Profile)
+    suspend fun deleteProfile(name: String)
     suspend fun updateTeams(name: String, teams: String)
+    suspend fun updateProfileName(oldName: String, newName: String)
 }
