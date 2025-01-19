@@ -54,6 +54,7 @@ import coil3.request.crossfade
 import com.klavs.football.R
 import com.klavs.football.data.entity.BottomBarItem
 import com.klavs.football.data.entity.ListedTeamInfos
+import com.klavs.football.data.routes.TeamDetail
 import com.klavs.football.uix.viewModel.MyTeamsViewModel
 import kotlinx.coroutines.launch
 
@@ -65,7 +66,7 @@ fun MyTeams(navController: NavHostController, viewModel: MyTeamsViewModel) {
 
     if (myProfile != null) {
         MyTeamsContent(
-            onTeamClick = { navController.navigate("team_detail/$it") },
+            onTeamClick = { navController.navigate(TeamDetail(it)) },
             teams = myProfile!!.teams.map { it.toInt() },
             addTeam = { viewModel.addTeam(it) },
             removeTeam = { viewModel.removeTeam(it) }

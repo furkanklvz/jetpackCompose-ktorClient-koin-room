@@ -12,15 +12,19 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
+import androidx.navigation.toRoute
 import com.klavs.football.data.entity.BottomBarItem
+import com.klavs.football.data.routes.Greeting
+import com.klavs.football.data.routes.Menu
+import com.klavs.football.data.routes.MyTeams
+import com.klavs.football.data.routes.TeamDetail
 import com.klavs.football.uix.Greeting
 import com.klavs.football.uix.Menu
 import com.klavs.football.uix.MyTeams
@@ -51,17 +55,17 @@ private fun NavHostContent(navController: NavHostController) {
         }) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = "greeting",
+            startDestination = Greeting,
             modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding())
         ) {
-            composable("greeting") {
+            composable<Greeting> {
                 LaunchedEffect(Unit) {
                     bottomBarIsVisible = false
                 }
                 val viewModel = koinViewModel<GreetingViewModel>{ parametersOf(it) }
                 Greeting(navController, viewModel)
             }
-            composable(BottomBarItem.MyTeams.route) {
+            composable<MyTeams> {
                 LaunchedEffect(Unit) {
                     bottomBarIsVisible = true
                 }
@@ -71,22 +75,18 @@ private fun NavHostContent(navController: NavHostController) {
                     viewModel = viewModel
                 )
             }
-            composable(BottomBarItem.Menu.route) {
+            composable<Menu> {
                 val viewModel = koinViewModel<MenuViewModel>{ parametersOf(it) }
                 Menu(
                 navController,
                 viewModel
             ) }
-            composable("team_detail/{id}",
-                arguments = listOf(
-                    navArgument("id") {
-                        type = NavType.IntType
-                    }
-                )) {
+            composable<TeamDetail> {
                 val teamDetailViewModel = koinViewModel<TeamDetailViewModel>{ parametersOf(it) }
+                val teamDetail = it.toRoute<TeamDetail>()
                 TeamDetail(
                     navController = navController,
-                    teamId = it.arguments?.getInt("id") ?: 0,
+                    teamId = teamDetail.id,
                     viewMode = teamDetailViewModel
                 )
             }
@@ -106,7 +106,7 @@ private fun BottomBar(navController: NavHostController) {
     ShortNavigationBar {
         bottomBarItems.forEach { bottomBarItem ->
             val selected =
-                currentDestination?.hierarchy?.any { it.route == bottomBarItem.route } == true
+                currentDestination?.hierarchy?.any { it.hasRoute(bottomBarItem.route::class) } == true
             ShortNavigationBarItem(
                 selected = selected,
                 onClick = {

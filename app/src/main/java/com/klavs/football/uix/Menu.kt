@@ -60,6 +60,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.klavs.football.R
 import com.klavs.football.data.entity.MenuItem
+import com.klavs.football.data.routes.Greeting
 import com.klavs.football.uix.viewModel.MenuViewModel
 import kotlinx.coroutines.launch
 
@@ -71,7 +72,7 @@ fun Menu(navController: NavHostController, viewModel: MenuViewModel) {
     MenuContent(
         changeProfile = {
             viewModel.changeProfile()
-            navController.navigate("greeting") {
+            navController.navigate(Greeting) {
                 popUpTo(0) {
                     inclusive = true
                 }
