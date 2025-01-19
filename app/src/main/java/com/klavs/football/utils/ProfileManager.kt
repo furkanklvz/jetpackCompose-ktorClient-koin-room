@@ -8,11 +8,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class ProfileManager @Inject constructor(private val profileRepo: ProfileRepository) {
+
+class ProfileManager (private val profileRepo: ProfileRepository) {
     private val _currentProfile = MutableStateFlow<Profile?>(null)
     val currentProfile = _currentProfile.asStateFlow()
 

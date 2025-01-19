@@ -5,9 +5,8 @@ import com.klavs.football.data.entity.Profile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 
-class ProfileRepositoryImpl @Inject constructor(private val ds: ProfileDataSource) : ProfileRepository {
+class ProfileRepositoryImpl (private val ds: ProfileDataSource) : ProfileRepository {
     override suspend fun getProfiles() = ds.getProfiles().flowOn(Dispatchers.IO)
     override suspend fun getProfile(name: String)= ds.getProfile(name).flowOn(Dispatchers.IO)
     override suspend fun insertProfile(profile: Profile) = withContext(Dispatchers.IO){ds.insertProfile(profile)}

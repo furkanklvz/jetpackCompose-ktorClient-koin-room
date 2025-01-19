@@ -4,27 +4,28 @@ import android.util.Log
 import com.klavs.football.R
 import com.klavs.football.Resource
 import com.klavs.football.data.entity.Response
-import com.klavs.football.retrofit.TeamDao
-import java.net.UnknownHostException
-import javax.inject.Inject
+import com.klavs.football.data.entity.TeamResponse
+import com.klavs.football.ktor.KtorService
+import io.ktor.client.call.body
+import io.ktor.http.isSuccess
 
-class TeamDatasourceImpl @Inject constructor(private val teamDao: TeamDao) : TeamDatasource {
-    override suspend fun getTeam(id:Int): Resource<Response> {
+class TeamDatasourceImpl(
+    private val ktorService: KtorService
+) : TeamDatasource {
+
+    override suspend fun getTeamKtor(id: Int): Resource<Response> {
         return try {
-            val response = teamDao.getTeam(id)
-            if (response.isSuccessful && response.body() != null) {
-                val body = response.body()!!
-                Resource.Success(body.response.first())
+            val response = ktorService.getTeam(id)
+            if (response.status.isSuccess()) {
+                Resource.Success(data = response.body<TeamResponse>().response.first())
             } else {
-                Log.e("TeamDatasourceImpl", "getTeam: ${response.errorBody()}")
-                Resource.Error(message = R.string.something_went_wrong)
+                Resource.Error(
+                    message = R.string.something_went_wrong
+                )
             }
-        } catch (e: UnknownHostException) {
-            Log.e("TeamDatasourceImpl", "getTeam: $e")
-            return Resource.Error(message = R.string.server_failed)
         } catch (e: Exception) {
-            Log.e("TeamDatasourceImpl", "getTeam: $e")
-            return Resource.Error(message = R.string.something_went_wrong)
+            Log.e("TeamDatasourceImpl", "getTeamKtor: $e")
+            Resource.Error(message = R.string.something_went_wrong)
         }
     }
 }
