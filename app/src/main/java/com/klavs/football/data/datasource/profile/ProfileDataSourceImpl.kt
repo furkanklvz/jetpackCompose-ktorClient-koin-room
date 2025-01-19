@@ -2,9 +2,8 @@ package com.klavs.football.data.datasource.profile
 
 import com.klavs.football.data.entity.Profile
 import com.klavs.football.room.ProfilesDao
-import javax.inject.Inject
 
-class ProfileDataSourceImpl @Inject constructor(private val profilesDao: ProfilesDao) : ProfileDataSource {
+class ProfileDataSourceImpl (private val profilesDao: ProfilesDao) : ProfileDataSource {
     override fun getProfiles() = profilesDao.getProfiles()
     override fun getProfile(name: String)= profilesDao.getProfile(name)
     override suspend fun insertProfile(profile: Profile) = profilesDao.insertProfile(profile)

@@ -5,16 +5,13 @@ import androidx.lifecycle.viewModelScope
 import com.klavs.football.data.entity.Profile
 import com.klavs.football.data.repository.profile.ProfileRepository
 import com.klavs.football.utils.ProfileManager
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class MenuViewModel @Inject constructor(
+class MenuViewModel (
     private val profileManager: ProfileManager,
     private val profileRepo: ProfileRepository,
 ) : ViewModel() {

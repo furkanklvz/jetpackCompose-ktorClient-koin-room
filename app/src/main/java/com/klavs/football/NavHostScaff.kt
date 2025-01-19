@@ -12,7 +12,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -30,6 +29,8 @@ import com.klavs.football.uix.viewModel.GreetingViewModel
 import com.klavs.football.uix.viewModel.MenuViewModel
 import com.klavs.football.uix.viewModel.MyTeamsViewModel
 import com.klavs.football.uix.viewModel.TeamDetailViewModel
+import org.koin.androidx.compose.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 @Composable
 fun NavHostScaff() {
@@ -57,21 +58,21 @@ private fun NavHostContent(navController: NavHostController) {
                 LaunchedEffect(Unit) {
                     bottomBarIsVisible = false
                 }
-                val viewModel = hiltViewModel<GreetingViewModel>(it)
+                val viewModel = koinViewModel<GreetingViewModel>{ parametersOf(it) }
                 Greeting(navController, viewModel)
             }
             composable(BottomBarItem.MyTeams.route) {
                 LaunchedEffect(Unit) {
                     bottomBarIsVisible = true
                 }
-                val viewModel = hiltViewModel<MyTeamsViewModel>(it)
+                val viewModel = koinViewModel<MyTeamsViewModel>{ parametersOf(it) }
                 MyTeams(
                     navController = navController,
                     viewModel = viewModel
                 )
             }
             composable(BottomBarItem.Menu.route) {
-                val viewModel = hiltViewModel<MenuViewModel>(it)
+                val viewModel = koinViewModel<MenuViewModel>{ parametersOf(it) }
                 Menu(
                 navController,
                 viewModel
@@ -82,7 +83,7 @@ private fun NavHostContent(navController: NavHostController) {
                         type = NavType.IntType
                     }
                 )) {
-                val teamDetailViewModel = hiltViewModel<TeamDetailViewModel>(it)
+                val teamDetailViewModel = koinViewModel<TeamDetailViewModel>{ parametersOf(it) }
                 TeamDetail(
                     navController = navController,
                     teamId = it.arguments?.getInt("id") ?: 0,
