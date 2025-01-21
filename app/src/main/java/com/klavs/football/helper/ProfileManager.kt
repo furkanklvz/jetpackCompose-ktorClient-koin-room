@@ -1,4 +1,4 @@
-package com.klavs.football.utils
+package com.klavs.football.helper
 
 import com.klavs.football.data.entity.Profile
 import com.klavs.football.data.repository.profile.ProfileRepository

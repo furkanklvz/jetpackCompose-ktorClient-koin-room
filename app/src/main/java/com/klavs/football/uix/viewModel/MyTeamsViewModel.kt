@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.klavs.football.data.repository.profile.ProfileRepository
 import com.klavs.football.room.Converters
-import com.klavs.football.utils.ProfileManager
+import com.klavs.football.helper.ProfileManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

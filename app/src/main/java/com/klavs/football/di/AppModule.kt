@@ -14,7 +14,7 @@ import com.klavs.football.uix.viewModel.GreetingViewModel
 import com.klavs.football.uix.viewModel.MenuViewModel
 import com.klavs.football.uix.viewModel.TeamDetailViewModel
 import com.klavs.football.uix.viewModel.MyTeamsViewModel
-import com.klavs.football.utils.ProfileManager
+import com.klavs.football.helper.ProfileManager
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
